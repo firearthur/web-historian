@@ -37,14 +37,22 @@ exports.handleRequest = function (req, res) {
 
     var data = '';
     req.on('data', function(chunk) {
-
       data += chunk;
     });
     req.on('end', function() {
-     var useless = function (x){return null;};
-      archive.addUrlToList(data.slice(4),useless);
-      res.writeHead(302, httpHealpers.headers);
-      res.end()
+      var useless = function (x){return null;};
+        archive.isUrlArchived(site, (isIncluded)=>{
+          //console.log(isIncluded)
+          if(isIncluded){
+          archive.sendResponseFromFile(archive.paths.archivedSites + "/" + site, res);
+          } else {
+            res.writeHead(404 , httpHealpers.headers);
+            res.end('file not found');
+          }
+        });
+      //archive.addUrlToList(data.slice(4),useless);
+     // res.writeHead(302, httpHealpers.headers);
+     // res.end()
     });
 
   }
