@@ -38,16 +38,36 @@ exports.handleRequest = function (req, res) {
     var data = '';
     req.on('data', function(chunk) {
       data += chunk;
+      
     });
+    
     req.on('end', function() {
-      var useless = function (x){return null;};
-        archive.isUrlArchived(site, (isIncluded)=>{
-          //console.log(isIncluded)
-          if(isIncluded){
-          archive.sendResponseFromFile(archive.paths.archivedSites + "/" + site, res);
+      // console.log(data.slice(4));
+      var url = data.slice(4);
+      // var useless = function (x){return null;};
+        archive.isUrlInList(url, (isInList)=>{
+          if(isInList){
+ 
+            archive.isUrlArchived(url, (isIncluded)=>{
+            if(isIncluded){
+              // var redirectHeader = Object.assign({},httpHealpers.headers);
+              // redirectHeader.Location = url;
+              
+              res.writeHead(302 , {Location: url});
+              res.end();
+            } else {
+              //write to list
+              //give loading page
+
+              res.writeHead(301 , httpHealpers.headers);
+              res.end();
+            }
+        });
+           
           } else {
-            res.writeHead(404 , httpHealpers.headers);
-            res.end('file not found');
+            //not in list
+            //add to list
+            //give loading page
           }
         });
       //archive.addUrlToList(data.slice(4),useless);
