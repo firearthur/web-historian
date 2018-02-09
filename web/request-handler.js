@@ -9,16 +9,18 @@ var httpHealpers = require('./http-helpers');
 exports.handleRequest = function (req, res) {
 
   if(req.method === 'GET'){ //if its a get request
-    if(req.url === '/'){
+    if(req.url === '/'){ //index
       archive.sendResponseFromFile(archive.paths.archiveIndex, res);
     } else {
-      if(req.url === '/styles.css'){ 
+      if(req.url === '/styles.css'){ //styles
         archive.sendResponseFromFile(archive.paths.archiveStyles, res);
-      } else {
+      } else if(req.url === '/loading.html') { //loading page 
+        archive.sendResponseFromFile(archive.paths.archiveLoading, res);
+      } else {  // all other requests
 
         var site = req.url.slice(1);
         archive.isUrlArchived(site, (isIncluded)=>{
-          //console.log(isIncluded)
+
           if(isIncluded){
           archive.sendResponseFromFile(archive.paths.archivedSites + "/" + site, res);
           } else {
@@ -26,13 +28,9 @@ exports.handleRequest = function (req, res) {
             res.end('file not found');
           }
         });
-
-
       }
-
-   
     }
-  } else if(req.method === 'POST'){ //if its a post request
+  } else if(req.method === 'POST'){   //if its a post request
     
 
     var data = '';
@@ -40,45 +38,32 @@ exports.handleRequest = function (req, res) {
       data += chunk;
       
     });
-    
-    req.on('end', function() {
-      // console.log(data.slice(4));
+    req.on('end', function() {     //gather the data
+      
       var url = data.slice(4);
-      // var useless = function (x){return null;};
-        archive.isUrlInList(url, (isInList)=>{
-          if(isInList){
- 
+      
+        archive.isUrlInList(url, (isInList)=>{    
+          if(isInList){     //is the url in list?
             archive.isUrlArchived(url, (isIncluded)=>{
-            if(isIncluded){
-              // var redirectHeader = Object.assign({},httpHealpers.headers);
-              // redirectHeader.Location = url;
-              
-              res.writeHead(302 , {Location: url});
+            if(isIncluded){   //is the url archived?
+  
+              res.writeHead(302 , {Location: url});  //redirecting to a GET request on the url we got from user
               res.end();
-            } else {
-              //write to list
-              //give loading page
-
-              res.writeHead(301 , httpHealpers.headers);
+            } else {   // the url is not archived              
+              res.writeHead(302 , {Location: 'loading.html'});  //redirecting to a GET request on the loading page
               res.end();
             }
-        });
-           
-          } else {
-            //not in list
+        })} else {   //the url is not in list
             //add to list
-            //give loading page
+            archive.addUrlToList(url,()=>{});
+            res.writeHead(302 , {Location: 'loading.html'});  //redirecting to a GET request on the loading page
+            res.end();
           }
         });
-      //archive.addUrlToList(data.slice(4),useless);
-     // res.writeHead(302, httpHealpers.headers);
-     // res.end()
+
     });
 
   }
   
-   
-
-
-  //res.end(archive.paths.archiveIndex);
+  
 };

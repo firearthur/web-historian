@@ -15,7 +15,8 @@ exports.paths = {
   archivedSites: path.join(__dirname, '../archives/sites'),
   list: path.join(__dirname, '../archives/sites.txt'),
   archiveIndex : path.join(__dirname, '../web/public/index.html'),
-  archiveStyles : path.join(__dirname, '../web/public/styles.css')
+  archiveStyles : path.join(__dirname, '../web/public/styles.css'),
+  archiveLoading : path.join(__dirname, '../web/public/loading.html')
 };
 
 // Used for stubbing paths for tests, do not modify
